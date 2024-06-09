@@ -1,48 +1,254 @@
-# Skybrush Server
+# Skybrush Server Setup Guide for macOS
 
-Skybrush Server is the server component behind the Skybrush ecosystem; it handles
-communication channels to drones and provides an abstraction layer on top of them
-so frontend apps (like Skybrush Live) do not need to know what type of drones
-they are communicating with.
+This guide provides a comprehensive step-by-step process to set up the Skybrush server on macOS.
 
-The server also provides additional facilities like clocks, RTK correction
-sources, weather providers and so on. It is extensible via extension modules
-that can be loaded automatically at startup or dynamically while the server is
-running. In fact, most of the functionality in the server is implemented in the
-form of extensions; see the `flockwave.server.ext` module in the source code
-for the list of built-in extensions. You may also develop your own extensions to
-extend the functionality of the server.
+## Table of Contents
 
-## Installation
+1. [Install Homebrew](#install-homebrew)
+2. [Install Python](#install-python)
+3. [Verify Python Installation](#verify-python-installation)
+4. [Install pip](#install-pip)
+5. [Install penv (Optional)](#install-penv-optional)
+6. [Clone the Skybrush Server Repository](#clone-the-skybrush-server-repository)
+7. [Create a Virtual Environment](#create-a-virtual-environment)
+8. [Activate the Virtual Environment](#activate-the-virtual-environment)
+9. [Install Poetry (Temporary Step)](#install-poetry-temporary-step)
+10. [Generate Requirements File](#generate-requirements-file)
+11. [Install Dependencies](#install-dependencies)
+12. [Run the Skybrush Server](#run-the-skybrush-server)
+13. [Optional: Uninstall Poetry](#optional-uninstall-poetry)
+14. [Additional Configurations](#additional-configurations)
+    - [Configuration Files](#configuration-files)
+    - [Running the Server with Configuration](#running-the-server-with-configuration)
+15. [File Structure](#file-structure)
+16. [Important Notes](#important-notes)
 
-1. Install `poetry`. `poetry` will manage a separate virtual environment for this
-   project to keep things nicely separated. You won't pollute the system Python
-   with the dependencies of the Skybrush server and everyone will be happier.
-   See https://python-poetry.org/ for installation instructions.
+## Install Homebrew
 
-2. Check out the source code of the server.
+Homebrew is a package manager for macOS. If you don't have it installed, you can install it by running the following command in your terminal:
 
-3. Run `poetry install` to install all the dependencies and the server itself
-   in a separate virtualenv. The virtualenv will be created in a folder named
-   `.venv` in the project folder.
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
 
-4. Run `poetry run skybrushd` to start the server.
+## Install Python
 
-## Documentation
+Once Homebrew is installed, you can use it to install Python:
 
-- [User guide](https://doc.collmot.com/public/skybrush-live-doc/latest/)
+```bash
+brew install python
+```
 
-## License
+## Verify Python Installation
 
-Skybrush Server is free software: you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Ensure Python is installed correctly by checking the version:
 
-Skybrush Server is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
-more details.
+```bash
+python3 --version
+```
 
-You should have received a copy of the GNU General Public License along with
-this program. If not, see <https://www.gnu.org/licenses/>.
+## Install pip
+
+pip should come pre-installed with Python. Verify pip installation:
+
+```bash
+pip3 --version
+```
+
+If pip is not installed, you can install it using the following command:
+
+```bash
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3 get-pip.py
+```
+
+## Install penv (Optional)
+
+You can use penv for virtual environment management if you prefer:
+
+```bash
+pip3 install penv
+```
+
+## Clone the Skybrush Server Repository
+
+Clone the repository to your local machine:
+
+```bash
+git clone https://github.com/skybrush-io/skybrush-server.git
+cd skybrush-server
+```
+
+## Create a Virtual Environment
+
+Create a virtual environment using the built-in `venv` module:
+
+```bash
+python3 -m venv .venv
+```
+
+## Activate the Virtual Environment
+
+Activate the virtual environment:
+
+```bash
+source .venv/bin/activate
+```
+
+## Install Poetry (Temporary Step)
+
+Install `poetry` to manage dependencies:
+
+```bash
+pip install poetry
+```
+
+## Generate Requirements File
+
+Use `poetry` to export the dependencies to a `requirements.txt` file:
+
+```bash
+poetry export -f requirements.txt --output requirements.txt --without-hashes
+```
+
+## Install Dependencies
+
+Install the dependencies listed in the `requirements.txt` file:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Run the Skybrush Server
+
+Start the Skybrush server using the following command:
+
+```bash
+PYTHONPATH=src python -m flockwave.server.launcher
+```
+
+## Optional: Uninstall Poetry
+
+If you want to remove `poetry` after generating the requirements file:
+
+```bash
+pip uninstall poetry
+```
+
+## Additional Configurations
+
+### Configuration Files
+
+You can use the provided configuration files (`skybrush-outdoor.jsonc` or `skybrush-virtual.jsonc`) to configure the server. Place these files in the appropriate directory and ensure the server is pointing to the correct configuration file.
+
+### Running the Server with Configuration
+
+If you need to specify a configuration file, you can do so by modifying the command to include the path to your configuration file:
+
+```bash
+PYTHONPATH=src python -m flockwave.server.launcher --config etc/conf/skybrush-outdoor.jsonc
+```
+
+## File Structure
+
+Here is the essential file structure for the Skybrush server setup:
+
+```
+skybrush-server/
+├── .venv/
+├── CHANGELOG.md
+├── DEPENDENCIES.md
+├── LICENSE.txt
+├── README.md
+├── doc/
+│   └── make.py
+├── etc/
+│   ├── conf/
+│   │   ├── skybrush-outdoor.jsonc
+│   │   └── skybrush-virtual.jsonc
+│   └── deployment/
+│       ├── docker/
+│       │   ├── amd64/
+│       │   │   └── Dockerfile
+│       │   └── build.sh
+│       └── rpi/
+│           ├── collmot-init.service
+│           ├── network.cfg
+│           ├── run-tasks-at-boot
+│           ├── skybrush-console-frontend.json
+│           ├── skybrush.json
+│           ├── tty1-override.conf
+│           └── ufw.conf
+├── poetry.lock
+├── poetry.toml
+├── pyproject.toml
+├── pytest.ini
+├── requirements.txt
+├── src/
+│   └── flockwave/
+│       ├── gateway/
+│       │   ├── __init__.py
+│       │   ├── app.py
+│       │   ├── asgi_app.py
+│       │   ├── config.py
+│       │   ├── errors.py
+│       │   ├── launcher.py
+│       │   ├── logger.py
+│       │   ├── version.py
+│       │   └── workers.py
+│       ├── proxy/
+│       │   ├── __init__.py
+│       │   ├── app.py
+│       │   ├── config.py
+│       │   ├── launcher.py
+│       │   ├── logger.py
+│       │   ├── version.py
+│       └── server/
+│           ├── __init__.py
+│           ├── __main__.py
+│           ├── app.py
+│           ├── comm.py
+│           ├── command_handlers/
+│           ├── commands.py
+│           ├── config.py
+│           ├── errors.py
+│           ├── ext/
+│           ├── launcher.py
+│           ├── logger.py
+│           ├── message_handlers.py
+│           ├── message_hub.py
+│           ├── middleware/
+│           ├── model/
+│           ├── ports.py
+│           ├── registries/
+│           ├── show/
+│           ├── tasks/
+│           ├── types.py
+│           ├── utils/
+│           └── version.py
+└── test/
+    ├── fixtures/
+    ├── test_crazyflie_trajectory.py
+    ├── test_ext_show_clock_synchronization.py
+    ├── test_led_lights_task.py
+    ├── test_mission.py
+    ├── test_model.py
+    ├── test_preflight_check.py
+    ├── test_progress_reporter.py
+    ├── test_rate_limiters.py
+    ├── test_show_formats.py
+    ├── test_show_player.py
+    ├── test_show_rth_plan.py
+    ├── test_show_trajectory.py
+    ├── test_show_utils.py
+    ├── test_show_yaw_control.py
+    └── test_utils_formatting.py
+```
+
+## Important Notes
+
+- Ensure that the virtual environment is activated before running any Python commands.
+- Configuration files (`skybrush-outdoor.jsonc` and `skybrush-virtual.jsonc`) are essential for specifying the server's setup. Place these files in the appropriate directory and reference them correctly when starting the server.
+- If using Docker for deployment, follow the provided scripts and Dockerfiles in the `etc/deployment/docker` directory.
+
+By following these instructions, you and your employees should be able to set up and run the Skybrush server on your macOS machines without issues. If you encounter any problems or need further assistance, feel free to ask!
