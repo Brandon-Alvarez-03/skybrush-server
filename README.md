@@ -75,7 +75,7 @@ pip3 install penv
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/skybrush-io/skybrush-server.git
+git clone https://github.com/Brandon-Alvarez-03/skybrush-server.git
 cd skybrush-server
 ```
 
